@@ -1,87 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Perfil Sensorial - Alquimistas del Café</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Alegreya Sans', sans-serif;
-      background-color: #f4f1ed;
-      color: #4e342e;
-      padding: 20px;
       margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background-color: #2d1e19;
+      color: #f4f1ed;
+      padding: 1rem;
     }
+
+    .logo {
+      max-width: 100px;
+      margin: 0 auto 1rem;
+      display: block;
+    }
+
     h1 {
       text-align: center;
-      font-size: 1.8rem;
-      margin-bottom: 10px;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
     }
-    p.intro {
+
+    p {
       text-align: center;
-      max-width: 600px;
-      margin: 0 auto 30px;
-      font-size: 1rem;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      color: #c7b7aa;
     }
+
     .slider-container {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      max-width: 500px;
+      gap: 1rem;
+      max-width: 400px;
       margin: 0 auto;
     }
+
     label {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
     input[type=range] {
       width: 60%;
     }
-    canvas {
-      max-width: 500px;
-      margin: 30px auto;
-      display: block;
-    }
+
     .value {
       font-weight: bold;
       margin-left: 10px;
       width: 30px;
       text-align: center;
     }
+
+    #chart-wrapper {
+      max-width: 400px;
+      margin: 2rem auto;
+      background-color: #3b2a23;
+      padding: 1rem;
+      border-radius: 10px;
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
     .controls {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 1.5rem;
     }
+
     input[type=email] {
-      padding: 8px;
-      width: 80%;
+      padding: 10px;
+      width: 90%;
       max-width: 300px;
-      margin-top: 10px;
+      margin: 10px auto;
+      display: block;
       border-radius: 5px;
-      border: 1px solid #ccc;
+      border: none;
     }
+
     button {
-      margin-top: 10px;
       padding: 10px 20px;
-      background-color: #6d4c41;
+      background-color: #a9745a;
       color: #fff;
       border: none;
       border-radius: 5px;
+      font-weight: bold;
       cursor: pointer;
+      margin-top: 10px;
     }
+
     button:hover {
-      background-color: #5d4037;
+      background-color: #8e5f49;
     }
   </style>
 </head>
 <body>
 
-  <h1>Creá tu perfil sensorial de café</h1>
-  <p class="intro">Mové los deslizadores para definir cómo percibís este café. Ajustá cada atributo y visualizá tu perfil sensorial en tiempo real.</p>
+  <img src="https://i.imgur.com/HfyTBTv.png" alt="Logo Alquimistas del Café" class="logo"/>
 
-  <div class="slider-container">
+  <h1>Creá tu perfil sensorial</h1>
+  <p>Mové los deslizadores para definir cómo percibís este café. Después, compartí tu perfil por mail.</p>
+
+  <div class="slider-container" id="sliders">
     <label>Fragancia:
       <input type="range" id="fragancia" min="0" max="10" value="7" oninput="updateChart()">
       <span class="value" id="val-fragancia">7</span>
@@ -120,16 +150,18 @@
     </label>
   </div>
 
-  <canvas id="spiderChart"></canvas>
+  <div id="chart-wrapper">
+    <canvas id="spiderChart"></canvas>
+  </div>
 
   <div class="controls">
-    <input type="email" id="email" placeholder="Tu correo (opcional)">
-    <br>
-    <button onclick="enviarPorMail()">Enviar perfil</button>
-    <button onclick="compartirPerfil()">Compartir perfil</button>
+    <input type="email" id="email" placeholder="Tu correo">
+    <button onclick="enviarCaptura()">Compartir perfil</button>
   </div>
 
   <script>
+    emailjs.init("user_demoID");
+
     const ctx = document.getElementById('spiderChart').getContext('2d');
     let chart = new Chart(ctx, {
       type: 'radar',
@@ -138,24 +170,22 @@
         datasets: [{
           label: 'Tu perfil sensorial',
           data: [7,6,8,6,7,7,8,6,5],
-          backgroundColor: 'rgba(141, 110, 99, 0.2)',
-          borderColor: 'rgba(141, 110, 99, 1)',
-          pointBackgroundColor: 'rgba(141, 110, 99, 1)',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderColor: '#f4e7da',
+          pointBackgroundColor: '#fff',
           borderWidth: 2
         }]
       },
       options: {
         responsive: true,
-        animation: {
-          duration: 800,
-          easing: 'easeOutCubic'
-        },
+        animation: { duration: 800, easing: 'easeOutCubic' },
         scales: {
           r: {
             min: 0,
             max: 10,
-            ticks: { stepSize: 1 },
-            pointLabels: { font: { size: 13 } }
+            ticks: { stepSize: 2, color: '#bbb' },
+            pointLabels: { color: '#eee', font: { size: 12 } },
+            grid: { color: '#665046' }
           }
         },
         plugins: { legend: { display: false } }
@@ -173,40 +203,21 @@
       chart.update();
     }
 
-    function compartirPerfil() {
-      const ids = ['fragancia','aroma','acidez','dulzor','cuerpo','cremosidad','claridad','balance','persistencia'];
-      const params = new URLSearchParams();
-      ids.forEach(id => {
-        params.set(id, document.getElementById(id).value);
-      });
-      const url = `${window.location.origin}?${params.toString()}`;
-      navigator.clipboard.writeText(url).then(() => {
-        alert("Enlace copiado: " + url);
-      });
-    }
-
-    function enviarPorMail() {
+    function enviarCaptura() {
       const email = document.getElementById('email').value;
-      const ids = ['fragancia','aroma','acidez','dulzor','cuerpo','cremosidad','claridad','balance','persistencia'];
-      let cuerpo = 'Perfil sensorial generado desde la app de Alquimistas:%0D%0A%0D%0A';
-      ids.forEach(id => {
-        const label = document.querySelector("label[for='" + id + "']") || id;
-        cuerpo += `${id.charAt(0).toUpperCase() + id.slice(1)}: ${document.getElementById(id).value}%0D%0A`;
+      if (!email) return alert("Ingresá un correo válido.");
+      html2canvas(document.body).then(canvas => {
+        const dataUrl = canvas.toDataURL('image/png');
+        emailjs.send("service_xxx", "template_xxx", {
+          to_email: email,
+          image_base64: dataUrl
+        }).then(() => {
+          alert("¡Perfil enviado a tu correo!");
+        }, (error) => {
+          alert("Error al enviar: " + JSON.stringify(error));
+        });
       });
-      if(email) cuerpo += `%0D%0ACorreo del usuario: ${email}`;
-      window.location.href = `mailto:alquimistasdelcafe@gmail.com?subject=Perfil sensorial generado desde la app de Alquimistas&body=${cuerpo}`;
     }
-
-    window.onload = () => {
-      const params = new URLSearchParams(window.location.search);
-      ['fragancia','aroma','acidez','dulzor','cuerpo','cremosidad','claridad','balance','persistencia'].forEach(id => {
-        if (params.has(id)) {
-          document.getElementById(id).value = params.get(id);
-          document.getElementById('val-' + id).textContent = params.get(id);
-        }
-      });
-      updateChart();
-    };
   </script>
 
 </body>
