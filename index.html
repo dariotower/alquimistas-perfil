@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Perfil Sensorial - Alquimistas del Café</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Alegreya Sans', sans-serif;
+      background-color: #f4f1ed;
+      color: #4e342e;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    p.intro {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 30px;
+      font-size: 1rem;
+    }
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    input[type=range] {
+      width: 60%;
+    }
+    canvas {
+      max-width: 500px;
+      margin: 30px auto;
+      display: block;
+    }
+    .value {
+      font-weight: bold;
+      margin-left: 10px;
+      width: 30px;
+      text-align: center;
+    }
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    input[type=email] {
+      padding: 8px;
+      width: 80%;
+      max-width: 300px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #6d4c41;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #5d4037;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Creá tu perfil sensorial de café</h1>
+  <p class="intro">Mové los deslizadores para definir cómo percibís este café. Ajustá cada atributo y visualizá tu perfil sensorial en tiempo real.</p>
+
+  <div class="slider-container">
+    <label>Fragancia:
+      <input type="range" id="fragancia" min="0" max="10" value="7" oninput="updateChart()">
+      <span class="value" id="val-fragancia">7</span>
+    </label>
+    <label>Aroma:
+      <input type="range" id="aroma" min="0" max="10" value="6" oninput="updateChart()">
+      <span class="value" id="val-aroma">6</span>
+    </label>
+    <label>Acidez:
+      <input type="range" id="acidez" min="0" max="10" value="8" oninput="updateChart()">
+      <span class="value" id="val-acidez">8</span>
+    </label>
+    <label>Dulzor:
+      <input type="range" id="dulzor" min="0" max="10" value="6" oninput="updateChart()">
+      <span class="value" id="val-dulzor">6</span>
+    </label>
+    <label>Cuerpo:
+      <input type="range" id="cuerpo" min="0" max="10" value="7" oninput="updateChart()">
+      <span class="value" id="val-cuerpo">7</span>
+    </label>
+    <label>Cremosidad:
+      <input type="range" id="cremosidad" min="0" max="10" value="7" oninput="updateChart()">
+      <span class="value" id="val-cremosidad">7</span>
+    </label>
+    <label>Claridad en taza:
+      <input type="range" id="claridad" min="0" max="10" value="8" oninput="updateChart()">
+      <span class="value" id="val-claridad">8</span>
+    </label>
+    <label>Balance:
+      <input type="range" id="balance" min="0" max="10" value="6" oninput="updateChart()">
+      <span class="value" id="val-balance">6</span>
+    </label>
+    <label>Persistencia:
+      <input type="range" id="persistencia" min="0" max="10" value="5" oninput="updateChart()">
+      <span class="value" id="val-persistencia">5</span>
+    </label>
+  </div>
+
+  <canvas id="spiderChart"></canvas>
+
+  <div class="controls">
+    <input type="email" id="email" placeholder="Tu correo (opcional)">
+    <br>
+    <button onclick="enviarPorMail()">Enviar perfil</button>
+    <button onclick="compartirPerfil()">Compartir perfil</button>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('spiderChart').getContext('2d');
+    let chart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Fragancia', 'Aroma', 'Acidez', 'Dulzor', 'Cuerpo', 'Cremosidad', 'Claridad en taza', 'Balance', 'Persistencia'],
+        datasets: [{
+          label: 'Tu perfil sensorial',
+          data: [7,6,8,6,7,7,8,6,5],
+          backgroundColor: 'rgba(141, 110, 99, 0.2)',
+          borderColor: 'rgba(141, 110, 99, 1)',
+          pointBackgroundColor: 'rgba(141, 110, 99, 1)',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        animation: {
+          duration: 800,
+          easing: 'easeOutCubic'
+        },
+        scales: {
+          r: {
+            min: 0,
+            max: 10,
+            ticks: { stepSize: 1 },
+            pointLabels: { font: { size: 13 } }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    function updateChart() {
+      const ids = ['fragancia','aroma','acidez','dulzor','cuerpo','cremosidad','claridad','balance','persistencia'];
+      const values = ids.map(id => {
+        const val = +document.getElementById(id).value;
+        document.getElementById('val-' + id).textContent = val;
+        return val;
+      });
+      chart.data.datasets[0].data = values;
+      chart.update();
+    }
+
+    function compartirPerfil() {
+      const ids = ['fragancia','aroma','acidez','dulzor','cuerpo','cremosidad','claridad','balance','persistencia'];
+      const params = new URLSearchParams();
+      ids.forEach(id => {
+        params.set(id, document.getElementById(id).value);
+      });
+      const url = `${window.location.origin}?${params.toString()}`;
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Enlace copiado: " + url);
+      });
+    }
+
+    function enviarPorMail() {
+      const email = document.getElementById('email').value;
+      const ids = ['fragancia','aroma','acidez','dulzor','cuerpo','cremosidad','claridad','balance','persistencia'];
+      let cuerpo = 'Perfil sensorial generado desde la app de Alquimistas:%0D%0A%0D%0A';
+      ids.forEach(id => {
+        const label = document.querySelector("label[for='" + id + "']") || id;
+        cuerpo += `${id.charAt(0).toUpperCase() + id.slice(1)}: ${document.getElementById(id).value}%0D%0A`;
+      });
+      if(email) cuerpo += `%0D%0ACorreo del usuario: ${email}`;
+      window.location.href = `mailto:alquimistasdelcafe@gmail.com?subject=Perfil sensorial generado desde la app de Alquimistas&body=${cuerpo}`;
+    }
+
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      ['fragancia','aroma','acidez','dulzor','cuerpo','cremosidad','claridad','balance','persistencia'].forEach(id => {
+        if (params.has(id)) {
+          document.getElementById(id).value = params.get(id);
+          document.getElementById('val-' + id).textContent = params.get(id);
+        }
+      });
+      updateChart();
+    };
+  </script>
+
+</body>
+</html>
