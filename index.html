@@ -216,6 +216,18 @@ function compartirRedes() {
   window.open(twitter, '_blank');
   window.open(whatsapp, '_blank');
 }
+
+  function guardarEnGoogleSheets(nombre, correo) {
+  const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdNZa9QS6pSpgtkfnzVPladkiYH-SJB8ag_LAYEdJ3AlMqUDA/formResponse';
+  const data = new FormData();
+  data.append('entry.1081148365', nombre);  // Campo Nombre
+  data.append('entry.1045781291', correo);  // Campo Correo
+  fetch(formUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: data
+}
+        
 </script>
 
 </body>
