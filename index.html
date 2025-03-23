@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfil Sensorial - Alquimistas del Café</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f3ede6;
+      color: #4e342e;
+      padding: 1rem;
+    }
+    .hidden { display: none; }
+    .logo {
+      max-width: 100px;
+      margin: 0 auto 1rem;
+      display: block;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .intro {
+      max-width: 400px;
+      margin: 0 auto 2rem;
+      text-align: center;
+    }
+    form {
+      max-width: 300px;
+      margin: 2rem auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    input[type=text], input[type=email] {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px;
+      background-color: #6d4c41;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 400px;
+      margin: 2rem auto;
+    }
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    input[type=range] {
+      width: 60%;
+    }
+    .value {
+      font-weight: bold;
+      margin-left: 10px;
+      width: 30px;
+      text-align: center;
+    }
+    #spiderChart {
+      display: block;
+      max-width: 400px;
+      margin: 1rem auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .controls {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    .share-btn {
+      margin-top: 1rem;
+      background-color: #8d6e63;
+    }
+    #descarga-info {
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="static/logo-alquimistas.png" alt="Alquimistas del Café" class="logo">
+
+  <section id="formulario">
+    <h1>Bienvenide a tu perfil sensorial</h1>
+    <p class="intro">Ingresá tu nombre y correo para comenzar. Usaremos esta info para guardar tu perfil.</p>
+    <form onsubmit="return iniciar()">
+      <input type="text" id="nombre" placeholder="Tu nombre" required>
+      <input type="email" id="correo" placeholder="Tu correo electrónico" required>
+      <button type="submit">Comenzar</button>
+    </form>
+  </section>
+
+  <section id="contenido" class="hidden">
+    <h2 id="titulo-saludo"></h2>
+
+    <div class="slider-container">
+      <label>Fragancia:
+        <input type="range" id="fragancia" min="0" max="10" value="7" oninput="updateChart()">
+        <span class="value" id="val-fragancia">7</span>
+      </label>
+      <label>Aroma:
+        <input type="range" id="aroma" min="0" max="10" value="6" oninput="updateChart()">
+        <span class="value" id="val-aroma">6</span>
+      </label>
+      <label>Acidez:
+        <input type="range" id="acidez" min="0" max="10" value="8" oninput="updateChart()">
+        <span class="value" id="val-acidez">8</span>
+      </label>
+      <label>Dulzor:
+        <input type="range" id="dulzor" min="0" max="10" value="6" oninput="updateChart()">
+        <span class="value" id="val-dulzor">6</span>
+      </label>
+      <label>Cuerpo:
+        <input type="range" id="cuerpo" min="0" max="10" value="7" oninput="updateChart()">
+        <span class="value" id="val-cuerpo">7</span>
+      </label>
+      <label>Cremosidad:
+        <input type="range" id="cremosidad" min="0" max="10" value="7" oninput="updateChart()">
+        <span class="value" id="val-cremosidad">7</span>
+      </label>
+      <label>Claridad en taza:
+        <input type="range" id="claridad" min="0" max="10" value="8" oninput="updateChart()">
+        <span class="value" id="val-claridad">8</span>
+      </label>
+      <label>Balance:
+        <input type="range" id="balance" min="0" max="10" value="6" oninput="updateChart()">
+        <span class="value" id="val-balance">6</span>
+      </label>
+      <label>Persistencia:
+        <input type="range" id="persistencia" min="0" max="10" value="5" oninput="updateChart()">
+        <span class="value" id="val-persistencia">5</span>
+      </label>
+    </div>
+
+    <canvas id="spiderChart"></canvas>
+
+    <div class="controls">
+      <button onclick="descargarGrafico()" class="share-btn">Descargar para historia IG</button>
+      <p id="descarga-info">Subila a tu historia y etiquetanos en <strong>@alquimistasdelcafe</strong></p>
+    </div>
+  </section>
+
+<script>
+let chart;
+
+function iniciar() {
+  const nombre = document.getElementById("nombre").value;
+  const correo = document.getElementById("correo").value;
+
+  document.getElementById("formulario").classList.add("hidden");
+  document.getElementById("contenido").classList.remove("hidden");
+  document.getElementById("titulo-saludo").innerText = `Hola ${nombre}, armá tu perfil sensorial`;
+
+  guardarEnGoogleSheets(nombre, correo);
+  setTimeout(initChart, 200);
+  return false;
+}
+
+function guardarEnGoogleSheets(nombre, correo) {
+  const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdNZa9QS6pSpgtkfnzVPladkiYH-SJB8ag_LAYEdJ3AlMqUDA/formResponse';
+  const data = new FormData();
+  data.append('entry.1081148365', nombre);
+  data.append('entry.2131834069', correo);
+  fetch(formUrl, { method: 'POST', mode: 'no-cors', body: data });
+}
+
+function initChart() {
+  const ctx = document.getElementById('spiderChart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Fragancia', 'Aroma', 'Acidez', 'Dulzor', 'Cuerpo', 'Cremosidad', 'Claridad en taza', 'Balance', 'Persistencia'],
+      datasets: [{
+        label: 'Tu perfil sensorial',
+        data: [7,6,8,6,7,7,8,6,5],
+        backgroundColor: 'rgba(141, 110, 99, 0.2)',
+        borderColor: 'rgba(141, 110, 99, 1)',
+        pointBackgroundColor: 'rgba(141, 110, 99, 1)',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          min: 0,
+          max: 10,
+          ticks: { stepSize: 2 },
+          pointLabels: { font: { size: 13 } }
+        }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+  updateChart();
+}
+
+function updateChart() {
+  if (!chart) return;
+  const ids = ['fragancia','aroma','acidez','dulzor','cuerpo','cremosidad','claridad','balance','persistencia'];
+  const values = ids.map(id => {
+    const val = +document.getElementById(id).value;
+    document.getElementById('val-' + id).textContent = val;
+    return val;
+  });
+  chart.data.datasets[0].data = values;
+  chart.update();
+}
+
+function descargarGrafico() {
+  html2canvas(document.getElementById("spiderChart")).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "perfil-sensorial.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+</script>
+
+</body>
+</html>
